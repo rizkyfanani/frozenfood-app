@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FrozenMaster Pro - Digital Business Kit</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;0,800;1,700&display=swap" rel="stylesheet">
+	 <!-- Library JS untuk PDF -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            orange: '#EA580C',
+                            orangeHover: '#C2410C',
+                            gold: '#F59E0B',
+                            dark: '#0F172A',
+                            card: '#1E293B',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0F172A;
+            background-image: radial-gradient(#1E293B 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #label-card-preview, #label-card-preview * {
+                visibility: visible;
+            }
+            #label-card-preview {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                box-shadow: none !important;
+                border: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-100 font-sans min-h-screen flex flex-col md:flex-row">
+
+    <!-- OVERLAY UNTUK MOBILE SIDEBAR -->
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/70 z-40 hidden md:hidden"></div>
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-50 w-64 bg-[#0B1120] border-r border-slate-800 flex flex-col justify-between transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out shrink-0">
+        <div>
+            <!-- Sidebar Header / Logo -->
+            <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="bg-brand-orange text-white p-2.5 rounded-xl text-lg font-black shadow-lg shadow-brand-orange/20">🍱</div>
+                    <div>
+                        <h1 class="font-extrabold text-sm text-white tracking-tight leading-none">FrozenMasterPro</h1>
+                        <span class="text-[9px] font-bold tracking-widest text-brand-gold uppercase">DIGITAL BUSINESS KIT</span>
+                    </div>
+                </div>
+                <!-- Close Mobile Button -->
+                <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Sidebar Menu List -->
+            <nav class="p-4 space-y-1.5">
+                <button onclick="switchTab('cover')" id="btn-cover" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition text-white bg-brand-orange shadow-lg shadow-brand-orange/20">
+                    <i class="fa-solid fa-book-open w-5 text-center"></i> Cover Kit
+                </button>
+                <button onclick="switchTab('hpp')" id="btn-hpp" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition text-slate-400 hover:bg-slate-800/60 hover:text-white">
+                    <i class="fa-solid fa-calculator w-5 text-center"></i> Kalkulator HPP
+                </button>
+                <button onclick="switchTab('packing')" id="btn-packing" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition text-slate-400 hover:bg-slate-800/60 hover:text-white">
+                    <i class="fa-solid fa-box-tissue w-5 text-center"></i> Panduan Packing
+                </button>
+                <button onclick="switchTab('supplier')" id="btn-supplier" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition text-slate-400 hover:bg-slate-800/60 hover:text-white">
+                    <i class="fa-solid fa-truck-field w-5 text-center"></i> Panduan Supplier
+                </button>
+                <button onclick="switchTab('label')" id="btn-label" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition text-slate-400 hover:bg-slate-800/60 hover:text-white">
+                    <i class="fa-solid fa-tags w-5 text-center"></i> Label Kemasan
+                </button>
+                <button onclick="switchTab('strategi')" id="btn-strategi" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition text-slate-400 hover:bg-slate-800/60 hover:text-white">
+                    <i class="fa-solid fa-bullhorn w-5 text-center"></i> Strategi Jualan
+                </button>
+            </nav>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="p-4 border-t border-slate-800 text-center">
+            <span class="text-[10px] text-slate-500 block">© 2026 FrozenMaster Pro</span>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="flex-1 flex flex-col min-w-0">
+
+        <!-- TOP BAR FOR MOBILE -->
+        <header class="md:hidden bg-[#0B1120] border-b border-slate-800 p-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <button onclick="toggleSidebar()" class="text-white p-2 rounded-lg bg-slate-800">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+                <span class="font-bold text-sm text-white">FrozenMaster Pro</span>
+            </div>
+            <span id="page-title-badge-mobile" class="bg-brand-orange/20 text-brand-gold text-[10px] font-bold px-3 py-1 rounded-full uppercase border border-brand-orange/30">
+                COVER KIT
+            </span>
+        </header>
+
+        <!-- MAIN AREA TAB CONTENTS -->
+        <main class="p-4 md:p-8 flex-1 max-w-5xl w-full mx-auto">
+
+            <!-- TAB 1: COVER -->
+            <div id="tab-cover" class="tab-content active bg-slate-900 text-white rounded-3xl p-8 md:p-12 shadow-2xl text-center border border-slate-800">
+                <div class="inline-block bg-brand-orange/10 text-brand-gold font-bold text-xs px-4 py-1.5 rounded-full mb-4 border border-brand-orange/20">
+                    PANDUAN LENGKAP BISNIS FROZEN FOOD
+                </div>
+                <h1 class="font-serif text-4xl md:text-6xl font-extrabold text-white leading-tight mb-4 tracking-tight">
+                    FrozenMaster Pro
+                </h1>
+                <p class="text-slate-400 text-sm md:text-base max-w-xl mx-auto mb-8 leading-relaxed">
+                    Solusi all-in-one perhitungan HPP, panduan packing higienis, sourcing supplier murah, generator label kemasan lengkap, hingga strategi jualan terbukti.
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <button onclick="switchTab('hpp')" class="w-full sm:w-auto bg-brand-orange hover:bg-brand-orangeHover text-white font-bold px-8 py-3.5 rounded-xl text-sm shadow-lg shadow-brand-orange/20 transition transform hover:scale-105">
+                        Mulai Perhitungan HPP <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                    <!-- DIRECT LINK DOWNLOAD FILE PDF -->
+                    <a href="ebook-frozenmaster-pro.pdf" download="Ebook_FrozenMaster_Pro_Full_Guide.pdf" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 text-white font-bold px-8 py-3.5 rounded-xl text-sm shadow-xl transition border border-slate-700 flex items-center justify-center">
+                        <i class="fa-solid fa-file-pdf mr-2 text-brand-gold"></i> Download Ebook PDF
+                    </a>
+                </div>
+            </div>
+
+            <!-- TAB 2: KALKULATOR HPP & PROFIT -->
+            <div id="tab-hpp" class="tab-content">
+                <div class="max-w-6xl mx-auto space-y-6 my-2 text-left">
+                    
+                    <!-- HEADER MODULE -->
+                    <div class="bg-slate-900 border border-slate-800 text-white p-6 rounded-3xl shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <h2 class="text-2xl font-black text-white flex items-center gap-2">
+                                🧮 Kalkulator HPP & Proyeksi Pendapatan
+                            </h2>
+                            <p class="text-slate-400 text-xs sm:text-sm mt-1">Hitung HPP, harga jual ideal, BEP, hingga skema proyeksi omset & profit 10, 30, dan 100 hari.</p>
+                        </div>
+                        <div class="flex gap-2 shrink-0">
+                            <button onclick="resetForm()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-1.5">
+                                🔄 Reset
+                            </button>
+                            <button onclick="exportToPDF()" class="bg-brand-orange hover:bg-brand-orangeHover text-white font-black text-xs px-4 py-2.5 rounded-xl transition shadow-lg shadow-brand-orange/20 flex items-center gap-1.5">
+                                📄 Export PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid lg:grid-cols-12 gap-6" id="calculator-content">
+                        
+                        <!-- FORM INPUT (LEFT COLUMN) -->
+                        <div class="lg:col-span-6 bg-slate-900 p-6 rounded-3xl shadow-xl border border-slate-800 space-y-5">
+                            <h3 class="font-bold text-base text-brand-gold border-b border-slate-800 pb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-1 text-xs bg-brand-orange/20 text-brand-gold p-1.5 rounded-lg"></i> Data Produksi & Biaya (Per Batch)
+                            </h3>
+
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-2">Total Biaya Bahan Baku (Rp)</label>
+                                <input type="number" id="biayaBahan" placeholder="Contoh: 150000" oninput="hitungSemua()" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-orange focus:outline-none text-white font-semibold text-sm placeholder-slate-600">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-2">Hasil Produksi (Pcs)</label>
+                                    <input type="number" id="totalPcs" placeholder="Misal: 100" oninput="hitungSemua()" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-orange focus:outline-none text-white font-semibold text-sm placeholder-slate-600">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-2">Isi Per Pack (Pcs)</label>
+                                    <input type="number" id="pcsPerPack" placeholder="Misal: 10" oninput="hitungSemua()" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-orange focus:outline-none text-white font-semibold text-sm placeholder-slate-600">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-2">Biaya Operasional (Gas, Listrik, dll) (Rp)</label>
+                                <input type="number" id="biayaLain" placeholder="Contoh: 25000" oninput="hitungSemua()" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-orange focus:outline-none text-white font-semibold text-sm placeholder-slate-600">
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-2">Total Biaya Kemasan/Packing (Rp)</label>
+                                <input type="number" id="biayaPacking" placeholder="Contoh: 15000" oninput="hitungSemua()" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-orange focus:outline-none text-white font-semibold text-sm placeholder-slate-600">
+                            </div>
+
+                            <h3 class="font-bold text-base text-brand-gold border-b border-slate-800 pb-3 pt-2 flex items-center gap-2">
+                                <i class="fa-solid fa-2 text-xs bg-brand-orange/20 text-brand-gold p-1.5 rounded-lg"></i> Margin & Proyeksi Penjualan
+                            </h3>
+
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider">Target Profit (%)</label>
+                                    <span id="marginVal" class="text-xs font-extrabold text-brand-gold bg-brand-orange/20 border border-brand-orange/30 px-2.5 py-1 rounded-lg">30%</span>
+                                </div>
+                                <input type="range" id="marginProfit" min="5" max="100" value="30" step="5" oninput="updateMarginLabel(); hitungSemua();" class="w-full accent-brand-orange cursor-pointer">
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-2">Target Penjualan Per Hari (Pack)</label>
+                                <input type="number" id="targetJualHarian" placeholder="Contoh: 15" oninput="hitungSemua()" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-orange focus:outline-none text-white font-semibold text-sm placeholder-slate-600">
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-2">Total Biaya Tetap / Modal Peralatan (Rp)</label>
+                                <input type="number" id="biayaTetap" placeholder="Contoh: 1000000" oninput="hitungSemua()" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-orange focus:outline-none text-white font-semibold text-sm placeholder-slate-600">
+                            </div>
+                        </div>
+
+                        <!-- HASIL PERHITUNGAN (RIGHT COLUMN) -->
+                        <div class="lg:col-span-6 space-y-5">
+                            
+                            <!-- RINGKASAN HPP -->
+                            <div class="bg-slate-900 p-6 rounded-3xl shadow-xl border border-slate-800 space-y-4">
+                                <h3 class="font-bold text-base text-white border-b border-slate-800 pb-3 flex items-center gap-2">
+                                    📊 Ringkasan HPP & Harga Jual
+                                </h3>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="p-4 bg-slate-950 rounded-2xl border border-slate-800">
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">HPP Per Batch</p>
+                                        <p id="resHppBatch" class="text-lg sm:text-xl font-black text-white mt-1">Rp 0</p>
+                                    </div>
+                                    <div class="p-4 bg-slate-950 rounded-2xl border border-slate-800">
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">HPP Per Pcs</p>
+                                        <p id="resHppPcs" class="text-lg sm:text-xl font-black text-white mt-1">Rp 0</p>
+                                    </div>
+                                </div>
+
+                                <div class="p-4 bg-emerald-950/40 border border-emerald-500/30 rounded-2xl space-y-3">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">HPP Per Pack</p>
+                                            <p id="resHppPack" class="text-base font-extrabold text-emerald-200">Rp 0</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Rekomendasi Harga Jual/Pack</p>
+                                            <p id="resHargaJualPack" class="text-xl sm:text-2xl font-black text-emerald-400">Rp 0</p>
+                                        </div>
+                                    </div>
+                                    <div class="border-t border-emerald-500/20 pt-2 flex justify-between items-center text-xs">
+                                        <span class="font-bold text-emerald-300">Profit Bersih / Pack:</span>
+                                        <span id="resProfitPack" class="font-black text-slate-950 bg-brand-gold px-2.5 py-1 rounded-lg">Rp 0</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PROYEKSI PENDAPATAN (10, 30, 100 HARI) -->
+                            <div class="bg-slate-900 p-6 rounded-3xl shadow-xl border border-slate-800 space-y-4">
+                                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                                    <h3 class="font-bold text-base text-white">📈 Proyeksi Pendapatan</h3>
+                                    <span class="text-[10px] font-bold text-brand-gold bg-brand-orange/20 border border-brand-orange/30 px-3 py-1 rounded-full" id="targetLabelDisplay">Target: 0 Pack/Hari</span>
+                                </div>
+
+                                <div class="space-y-3 text-xs sm:text-sm">
+                                    <!-- 10 Hari -->
+                                    <div class="p-3.5 bg-slate-950 border border-slate-800 rounded-2xl flex justify-between items-center">
+                                        <div>
+                                            <p class="font-black text-slate-200">🗓️ Proyeksi 10 Hari</p>
+                                            <p class="text-slate-400 text-xs mt-0.5">Omset: <span id="omset10" class="font-bold text-slate-300">Rp 0</span></p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Profit Bersih</p>
+                                            <p id="profit10" class="text-base font-black text-emerald-400">Rp 0</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- 30 Hari -->
+                                    <div class="p-3.5 bg-emerald-950/20 border border-emerald-500/30 rounded-2xl flex justify-between items-center">
+                                        <div>
+                                            <p class="font-black text-emerald-300">🗓️ Proyeksi 30 Hari (1 Bulan)</p>
+                                            <p class="text-slate-400 text-xs mt-0.5">Omset: <span id="omset30" class="font-bold text-slate-300">Rp 0</span></p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Profit Bersih</p>
+                                            <p id="profit30" class="text-lg font-black text-emerald-400">Rp 0</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- 100 Hari -->
+                                    <div class="p-3.5 bg-brand-orange/10 border border-brand-orange/30 rounded-2xl flex justify-between items-center">
+                                        <div>
+                                            <p class="font-black text-brand-gold">🗓️ Proyeksi 100 Hari</p>
+                                            <p class="text-slate-400 text-xs mt-0.5">Omset: <span id="omset100" class="font-bold text-slate-300">Rp 0</span></p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-[10px] text-brand-gold font-bold uppercase tracking-wider">Profit Bersih</p>
+                                            <p id="profit100" class="text-lg font-black text-brand-gold">Rp 0</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SKEMA PROYEKSI BEP -->
+                            <div class="bg-slate-900 p-6 rounded-3xl shadow-xl border border-slate-800 space-y-3">
+                                <h3 class="font-bold text-base text-white border-b border-slate-800 pb-3">🎯 Skema Proyeksi BEP</h3>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="p-3.5 bg-slate-950 border border-slate-800 rounded-2xl">
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">BEP Unit</p>
+                                        <p id="resBepPack" class="text-base sm:text-lg font-black text-brand-gold mt-1">0 Pack</p>
+                                    </div>
+                                    <div class="p-3.5 bg-slate-950 border border-slate-800 rounded-2xl">
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">BEP Nominal</p>
+                                        <p id="resBepRupiah" class="text-base sm:text-lg font-black text-brand-gold mt-1">Rp 0</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- TAB 3: PANDUAN PACKING -->
+            <div id="tab-packing" class="tab-content bg-slate-900 text-white rounded-3xl p-6 md:p-8 shadow-2xl border border-slate-800">
+                <div class="mb-6">
+                    <div class="flex items-center gap-2 text-[10px] font-bold tracking-widest text-brand-gold uppercase mb-1">
+                        <span class="w-4 h-[2px] bg-brand-gold inline-block"></span> STANDAR OPERASIONAL PROSEDUR PACKING
+                    </div>
+                    <h2 class="font-serif text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-1">Panduan Packing Frozen Food Aman</h2>
+                    <p class="text-xs text-slate-400">Prosedur standar menjaga kualitas makanan agar tidak rusak, mencair, atau basi saat sampai di tangan konsumen.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+                    <div class="border border-slate-800 rounded-2xl p-5 bg-slate-800/40">
+                        <h3 class="font-bold text-sm text-white mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-box-open text-brand-gold text-base"></i> Material Kemasan Wajib
+                        </h3>
+                        <ul class="text-xs text-slate-300 space-y-2.5">
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+                                <span><strong>Plastik Vacuum Embossed:</strong> Ketebalan min. 80 micron agar tidak gampang bocor atau tertusuk duri/tulang.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+                                <span><strong>Ice Gel Pack Frozen:</strong> Bekukan ice gel minimal 24 jam sebelum digunakan (rasio 1:1 dengan berat produk).</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-check text-emerald-400 mt-0.5"></i>
+                                <span><strong>Insulasi Thermal / Foil:</strong> Gunakan Bubble Mailer Foil atau Styrofoam Box untuk pengiriman jarak jauh.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="border border-slate-800 rounded-2xl p-5 bg-slate-800/40">
+                        <h3 class="font-bold text-sm text-white mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-truck-ramp-box text-brand-gold text-base"></i> Standar Jarak Pengiriman
+                        </h3>
+                        <ul class="text-xs text-slate-300 space-y-2.5">
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-motorcycle text-brand-gold mt-0.5"></i>
+                                <span><strong>Sameday / Instant (Lokal):</strong> Plastik Vacuum + Ice Gel 1 pcs + Kantong Plastik Sealer Rapat.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-van-shuttle text-brand-gold mt-0.5"></i>
+                                <span><strong>Next Day (1 - 2 Hari):</strong> Dus Karton Tebal + Thermal Foil Envelope + Ice Gel minimal 2-3 pcs.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-plane-departure text-brand-gold mt-0.5"></i>
+                                <span><strong>Ekspedisi Luar Kota (> 2 Hari):</strong> Box Styrofoam + Dry Ice + Solasi Rapat Keliling Luar.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-[#0B1120] text-white rounded-2xl p-6 border border-slate-800">
+                    <h4 class="font-bold text-brand-gold uppercase text-xs tracking-wider mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check"></i> 6 Langkah SOP Packing Sebelum Diserahkan Kurir
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-300 leading-relaxed">
+                        <div class="flex items-start gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-brand-orange text-white font-bold text-[10px] flex items-center justify-center shrink-0">1</span>
+                            <span>Pastikan produk sudah divakum hingga 0% rongga udara dan diseal dengan sempurna.</span>
+                        </div>
+                        <div class="flex items-start gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-brand-orange text-white font-bold text-[10px] flex items-center justify-center shrink-0">2</span>
+                            <span>Pembekuan penuh (Deep Freeze) di freezer minimal -18°C selama 12–24 jam sampai membatu.</span>
+                        </div>
+                        <div class="flex items-start gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-brand-orange text-white font-bold text-[10px] flex items-center justify-center shrink-0">3</span>
+                            <span>Bungkus produk bersama Ice Gel menggunakan thermal aluminium foil per lapis.</span>
+                        </div>
+                        <div class="flex items-start gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-brand-orange text-white font-bold text-[10px] flex items-center justify-center shrink-0">4</span>
+                            <span>Masukkan ke kardus/styrofoam, isi sela-sela kosong dengan potongan kertas/bubble wrap.</span>
+                        </div>
+                        <div class="flex items-start gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-brand-orange text-white font-bold text-[10px] flex items-center justify-center shrink-0">5</span>
+                            <span>Lakban rapat seluruh sambungan kardus agar udara luar tidak masuk mendinginkan.</span>
+                        </div>
+                        <div class="flex items-start gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-brand-orange text-white font-bold text-[10px] flex items-center justify-center shrink-0">6</span>
+                            <span>Tempelkan stiker peringatan "FRAGILE / FROZEN FOOD - JANGAN DITUMPUK / JANGAN KENA MATAHARI".</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: PANDUAN SUPPLIER -->
+            <div id="tab-supplier" class="tab-content bg-slate-900 text-white rounded-3xl p-6 md:p-10 shadow-2xl border border-slate-800">
+                <div class="mb-8">
+                    <div class="flex items-center gap-2 text-[10px] font-bold tracking-widest text-brand-gold uppercase mb-1">
+                        <span class="w-4 h-[2px] bg-brand-gold inline-block"></span> REKOMENDASI SUPPLIER & SOURCING
+                    </div>
+                    <h2 class="font-serif text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">Sourcing Bahan Baku Murah & Berkualitas</h2>
+                    <p class="text-sm text-slate-400">Panduan 6 lokasi & kanal utama mencari bahan dasar frozen food dengan harga grosir tangan pertama.</p>
+                </div>
+
+                <div class="space-y-4 mb-8">
+                    <div class="border border-slate-800 rounded-2xl p-5 md:p-6 bg-slate-800/40 shadow-sm flex gap-4 items-start">
+                        <div class="w-8 h-8 rounded-lg bg-brand-orange text-white font-bold text-sm flex items-center justify-center shrink-0">1</div>
+                        <div>
+                            <h3 class="font-bold text-base md:text-lg text-white mb-1">Pasar Induk Terdekat (Grosir Tangan Pertama)</h3>
+                            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">Tempat terbaik belanja daging boneless, ayam fillet, bumbu rempah, dan sayuran segar. Datang subuh (jam 02.00 – 05.00 WIB) untuk mendapatkan potongan harga partai besar.</p>
+                            <div class="flex flex-wrap gap-2 text-[10px] font-bold uppercase"><span class="bg-emerald-900/60 text-emerald-300 border border-emerald-700/50 px-2.5 py-1 rounded-md">HARGA PALING MURAH</span><span class="bg-amber-900/60 text-amber-300 border border-amber-700/50 px-2.5 py-1 rounded-md">PEMBELIAN LOKAL</span></div>
+                        </div>
+                    </div>
+
+                    <div class="border border-slate-800 rounded-2xl p-5 md:p-6 bg-slate-800/40 shadow-sm flex gap-4 items-start">
+                        <div class="w-8 h-8 rounded-lg bg-brand-orange text-white font-bold text-sm flex items-center justify-center shrink-0">2</div>
+                        <div>
+                            <h3 class="font-bold text-base md:text-lg text-white mb-1">Distributor Kemasan & Plastik Vacuum Online</h3>
+                            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">Cari di Shopee/Tokopedia dengan kata kunci <em>"Plastik vacuum embossed grosir roll"</em> atau <em>"Ice gel pack grosir pabrik"</em>. Beli perkarton (isi 500-1000 pcs) untuk memangkas HPP hingga 30%.</p>
+                            <div class="flex flex-wrap gap-2 text-[10px] font-bold uppercase"><span class="bg-emerald-900/60 text-emerald-300 border border-emerald-700/50 px-2.5 py-1 rounded-md">HEMAT HINGGA 30%</span><span class="bg-blue-900/60 text-blue-300 border border-blue-700/50 px-2.5 py-1 rounded-md">ONLINE / E-COMMERCE</span></div>
+                        </div>
+                    </div>
+
+                    <div class="border border-slate-800 rounded-2xl p-5 md:p-6 bg-slate-800/40 shadow-sm flex gap-4 items-start">
+                        <div class="w-8 h-8 rounded-lg bg-brand-orange text-white font-bold text-sm flex items-center justify-center shrink-0">3</div>
+                        <div>
+                            <h3 class="font-bold text-base md:text-lg text-white mb-1">Pusat Grosir Modern (Indogrosir / Lotte Grosir)</h3>
+                            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">Alternatif cepat untuk membeli bumbu penyedap, minyak goreng, dan kardus packing. Buat member khusus UMKM/Aplikasi untuk klaim cashback serta potongan harga rutin.</p>
+                            <div class="flex flex-wrap gap-2 text-[10px] font-bold uppercase"><span class="bg-sky-900/60 text-sky-300 border border-sky-700/50 px-2.5 py-1 rounded-md">GROSIR MODERN</span><span class="bg-indigo-900/60 text-indigo-300 border border-indigo-700/50 px-2.5 py-1 rounded-md">INVOICE RESMI UMKM</span></div>
+                        </div>
+                    </div>
+
+                    <div class="border border-slate-800 rounded-2xl p-5 md:p-6 bg-slate-800/40 shadow-sm flex gap-4 items-start">
+                        <div class="w-8 h-8 rounded-lg bg-brand-orange text-white font-bold text-sm flex items-center justify-center shrink-0">4</div>
+                        <div>
+                            <h3 class="font-bold text-base md:text-lg text-white mb-1">Supplier Daging & Seafood Cold Storage</h3>
+                            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">Untuk bahan utama seperti sirloin/ribeye slide, dori fillet, udang kupas, dan slice beef, jalin hubungan langsung dengan distributor cold storage kota lokal untuk jaminan kehalalan, standar higienis, dan pasokan stabil.</p>
+                            <div class="flex flex-wrap gap-2 text-[10px] font-bold uppercase"><span class="bg-purple-900/60 text-purple-300 border border-purple-700/50 px-2.5 py-1 rounded-md">KUALITAS STABIL</span><span class="bg-rose-900/60 text-rose-300 border border-rose-700/50 px-2.5 py-1 rounded-md">COLD CHAIN ASSURED</span></div>
+                        </div>
+                    </div>
+
+                    <div class="border border-slate-800 rounded-2xl p-5 md:p-6 bg-slate-800/40 shadow-sm flex gap-4 items-start">
+                        <div class="w-8 h-8 rounded-lg bg-brand-orange text-white font-bold text-sm flex items-center justify-center shrink-0">5</div>
+                        <div>
+                            <h3 class="font-bold text-base md:text-lg text-white mb-1">Industri Pengolahan Bumbu & Rempah Bubuk</h3>
+                            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">Beli bumbu halus, cabai bubuk, dan ekstrak rempah dalam skala bal-balan (5kg-10kg) langsung dari penggilingan rempah atau produsen bumbu tabur UMKM terdekat untuk konsistensi rasa masakan.</p>
+                            <div class="flex flex-wrap gap-2 text-[10px] font-bold uppercase"><span class="bg-amber-900/60 text-amber-300 border border-amber-700/50 px-2.5 py-1 rounded-md">RASA KONSISTEN</span><span class="bg-teal-900/60 text-teal-300 border border-teal-700/50 px-2.5 py-1 rounded-md">PARTAI BESAR</span></div>
+                        </div>
+                    </div>
+
+                    <div class="border border-slate-800 rounded-2xl p-5 md:p-6 bg-slate-800/40 shadow-sm flex gap-4 items-start">
+                        <div class="w-8 h-8 rounded-lg bg-brand-orange text-white font-bold text-sm flex items-center justify-center shrink-0">6</div>
+                        <div>
+                            <h3 class="font-bold text-base md:text-lg text-white mb-1">Agen Ice Gel & Produsen Box Styrofoam</h3>
+                            <p class="text-xs md:text-sm text-slate-300 leading-relaxed mb-3">Gunakan agen pengadaan spesialis perlengkapan insulasi pendingin untuk mendapatkan stok ice gel jelly re-usable, dry ice, serta box styrofoam berbagai ukuran dengan harga pabrik langsung.</p>
+                            <div class="flex flex-wrap gap-2 text-[10px] font-bold uppercase"><span class="bg-cyan-900/60 text-cyan-300 border border-cyan-700/50 px-2.5 py-1 rounded-md">PERLENGKAPAN PACKING</span><span class="bg-slate-800 text-slate-300 border border-slate-700 px-2.5 py-1 rounded-md">HARGA PABRIK</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-[#0B1120] text-white p-5 rounded-2xl flex items-start gap-3 border border-slate-800">
+                    <i class="fa-solid fa-handshake-angle text-brand-gold text-xl mt-0.5"></i>
+                    <div class="text-xs md:text-sm leading-relaxed text-slate-300">
+                        <strong class="text-brand-gold">Tips Negosiasi Supplier:</strong> Selalu tanyakan: <em>"Berapa minimal order (MOQ) untuk dapat harga reseller langganan?"</em> Jika rutin ambil tiap minggu, minta pembayaran dengan sistem TOP (Time of Payment) 7-14 hari untuk menjaga cash flow usahamu.
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: LABEL KEMASAN -->
+            <div id="tab-label" class="tab-content bg-slate-900 text-white rounded-3xl p-6 md:p-8 shadow-2xl border border-slate-800">
+                <div class="mb-6">
+                    <div class="flex items-center gap-2 text-[10px] font-bold tracking-widest text-brand-gold uppercase mb-1">
+                        <span class="w-4 h-[2px] bg-brand-gold inline-block"></span> GENERATOR & TEMPLATE LABEL LENGKAP
+                    </div>
+                    <h2 class="font-serif text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-1">Label Kemasan Custom Realtime</h2>
+                    <p class="text-xs text-slate-400">Lengkapi detail produkmu termasuk logo toko, instruksi penyajian, penyimpanan, dan tanggal kadaluarsa.</p>
+                </div>
+
+                <!-- 10 Theme Switcher Buttons -->
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-8">
+                    <button onclick="setLabelTheme('dark')" class="theme-btn bg-brand-orange text-white text-xs font-semibold py-2 px-3 rounded-xl shadow-sm text-center">1. Dark Modern</button>
+                    <button onclick="setLabelTheme('light')" class="theme-btn bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-semibold py-2 px-3 rounded-xl text-center">2. Light Minimal</button>
+                    <button onclick="setLabelTheme('hijau')" class="theme-btn bg-emerald-900 hover:bg-emerald-800 text-emerald-100 text-xs font-semibold py-2 px-3 rounded-xl text-center">3. Hijau Eco</button>
+                    <button onclick="setLabelTheme('gold')" class="theme-btn bg-amber-900 hover:bg-amber-800 text-amber-100 text-xs font-semibold py-2 px-3 rounded-xl text-center">4. Gold Luxury</button>
+                    <button onclick="setLabelTheme('red')" class="theme-btn bg-rose-900 hover:bg-rose-800 text-rose-100 text-xs font-semibold py-2 px-3 rounded-xl text-center">5. Pedas Merah</button>
+                    <button onclick="setLabelTheme('blue')" class="theme-btn bg-sky-900 hover:bg-sky-800 text-sky-100 text-xs font-semibold py-2 px-3 rounded-xl text-center">6. Ocean Fresh</button>
+                    <button onclick="setLabelTheme('purple')" class="theme-btn bg-purple-900 hover:bg-purple-800 text-purple-100 text-xs font-semibold py-2 px-3 rounded-xl text-center">7. Royal Purple</button>
+                    <button onclick="setLabelTheme('vintage')" class="theme-btn bg-stone-300 hover:bg-stone-400 text-stone-900 text-xs font-semibold py-2 px-3 rounded-xl text-center">8. Vintage Kraft</button>
+                    <button onclick="setLabelTheme('neon')" class="theme-btn bg-black text-lime-400 border border-lime-500/50 text-xs font-semibold py-2 px-3 rounded-xl text-center">9. Neon Cyber</button>
+                    <button onclick="setLabelTheme('pastel')" class="theme-btn bg-pink-900 hover:bg-pink-800 text-pink-100 text-xs font-semibold py-2 px-3 rounded-xl text-center">10. Pastel Soft</button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 mb-8">
+                    <!-- Form Inputs -->
+                    <div class="md:col-span-6 space-y-3">
+                        <div class="text-[11px] font-bold text-brand-gold uppercase mb-2"><i class="fa-solid fa-pen-to-square"></i> EDIT DATA LABEL KAMU</div>
+                        
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">UPLOAD LOGO TOKO / BRAND</label>
+                            <input type="file" id="lbl-logo-input" accept="image/*" onchange="previewLogo(event)" class="w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-orange file:text-white hover:file:bg-brand-orangeHover cursor-pointer bg-slate-800 border border-slate-700 rounded-xl p-1">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">BRAND / TOKO</label>
+                                <input type="text" id="lbl-brand" value="FrozenMaster Pro" oninput="updateLabelPreview()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-white focus:outline-none focus:border-brand-orange">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">NO. WHATSAPP</label>
+                                <input type="text" id="lbl-wa" value="0812-3456-7890" oninput="updateLabelPreview()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-white focus:outline-none focus:border-brand-orange">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">NAMA PRODUK</label>
+                            <input type="text" id="lbl-produk" value="Bakso Aci Kuah Merah" oninput="updateLabelPreview()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-white focus:outline-none focus:border-brand-orange">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">BERAT BERSIH / ISI</label>
+                                <input type="text" id="lbl-isiberat" value="10 pcs · 250gr" oninput="updateLabelPreview()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-white focus:outline-none focus:border-brand-orange">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">HARGA / TAG</label>
+                                <input type="text" id="lbl-harga" value="Rp 15.000" oninput="updateLabelPreview()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-white focus:outline-none focus:border-brand-orange">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">TGL PRODUKSI</label>
+                                <input type="text" id="lbl-prod" value="12/10/2026" oninput="updateLabelPreview()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-white focus:outline-none focus:border-brand-orange">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">TGL KADALUARSA (EXP)</label>
+                                <input type="text" id="lbl-exp" value="12/01/2027" oninput="updateLabelPreview()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-white focus:outline-none focus:border-brand-orange">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">CARA PENYAJIAN</label>
+                            <input type="text" id="lbl-saji" value="Rebus dalam air mendidih 5-7 menit, siap disajikan." oninput="updateLabelPreview()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-white focus:outline-none focus:border-brand-orange">
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">CARA PENYIMPANAN</label>
+                            <input type="text" id="lbl-simpan" value="Simpan di freezer suhu -18°C. Tahan hingga 3 bulan." oninput="updateLabelPreview()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-semibold text-white focus:outline-none focus:border-brand-orange">
+                        </div>
+                    </div>
+
+                    <!-- Live Card Preview & Download Buttons -->
+                    <div class="md:col-span-6 flex flex-col justify-start space-y-4">
+                        <div class="text-[11px] font-bold text-brand-gold uppercase"><i class="fa-solid fa-eye"></i> PREVIEW HASIL LABEL</div>
+                        
+                        <div id="label-card-preview" class="bg-[#0B1120] text-white p-5 rounded-2xl border border-slate-800 shadow-2xl relative transition-all duration-300">
+                            
+                            <!-- LOGO DISPLAY AREA -->
+                            <div id="prev-logo-container" class="hidden text-center mb-2">
+                                <img id="prev-lbl-logo" src="" alt="Logo Toko" class="h-12 mx-auto object-contain rounded-lg">
+                            </div>
+
+                            <div class="text-center mb-2">
+                                <span id="prev-lbl-tagline" class="text-[8px] font-bold uppercase tracking-widest block opacity-80">HOMEMADE FROZEN FOOD</span>
+                                <h3 id="prev-lbl-produk" class="font-serif font-extrabold text-xl mt-0.5">Bakso Aci Kuah Merah</h3>
+                                <p id="prev-lbl-isiberat" class="text-[10px] opacity-80">10 pcs · 250gr</p>
+                            </div>
+
+                            <div class="border-t border-current opacity-20 my-2.5"></div>
+
+                            <div class="space-y-2 text-[9px] opacity-90 leading-tight mb-3">
+                                <div>
+                                    <strong class="block font-bold uppercase text-[8px] opacity-75">🍳 CARA PENYAJIAN:</strong>
+                                    <span id="prev-lbl-saji">Rebus dalam air mendidih 5-7 menit, siap disajikan.</span>
+                                </div>
+                                <div>
+                                    <strong class="block font-bold uppercase text-[8px] opacity-75">❄️ CARA PENYIMPANAN:</strong>
+                                    <span id="prev-lbl-simpan">Simpan di freezer suhu -18°C. Tahan hingga 3 bulan.</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-black/20 p-2 rounded-lg flex justify-between items-center text-[9px] mb-3 border border-current/10">
+                                <div>
+                                    <span class="opacity-70 block text-[8px]">PROD:</span>
+                                    <strong id="prev-lbl-prod" class="font-semibold">12/10/2026</strong>
+                                </div>
+                                <div class="text-right">
+                                    <span class="opacity-70 block text-[8px]">EXP DATE:</span>
+                                    <strong id="prev-lbl-exp" class="font-semibold text-rose-300">12/01/2027</strong>
+                                </div>
+                            </div>
+
+                            <div class="border-t border-current opacity-20 my-2"></div>
+
+                            <div class="flex justify-between items-center text-[10px] pt-1">
+                                <div>
+                                    <strong id="prev-lbl-brand" class="font-bold uppercase tracking-wider block">FrozenMaster Pro</strong>
+                                    <span class="text-[9px] opacity-80"><i class="fa-brands fa-whatsapp mr-1"></i><span id="prev-lbl-wa">0812-3456-7890</span></span>
+                                </div>
+                                <span id="prev-lbl-harga" class="font-bold text-sm">Rp 15.000</span>
+                            </div>
+                        </div>
+
+                        <!-- OPSI DOWNLOAD & PILIHAN UKURAN -->
+                        <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 space-y-3">
+                            <span class="text-[11px] font-bold text-white uppercase block border-b border-slate-700/60 pb-2">
+                                <i class="fa-solid fa-download mr-1 text-brand-gold"></i> DOWNLOAD LABEL DALAM 4 UKURAN
+                            </span>
+                            
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <button onclick="cetakUkuran('7x5')" class="bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold py-2 px-3 rounded-xl flex items-center justify-between transition">
+                                    <span>7 x 5 cm</span>
+                                    <i class="fa-solid fa-print text-brand-gold"></i>
+                                </button>
+                                <button onclick="cetakUkuran('8x10')" class="bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold py-2 px-3 rounded-xl flex items-center justify-between transition">
+                                    <span>8 x 10 cm</span>
+                                    <i class="fa-solid fa-print text-brand-gold"></i>
+                                </button>
+                                <button onclick="cetakUkuran('10x15')" class="bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold py-2 px-3 rounded-xl flex items-center justify-between transition">
+                                    <span>10 x 15 cm</span>
+                                    <i class="fa-solid fa-print text-brand-gold"></i>
+                                </button>
+                                <button onclick="cetakUkuran('5x5')" class="bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold py-2 px-3 rounded-xl flex items-center justify-between transition">
+                                    <span>5 x 5 cm</span>
+                                    <i class="fa-solid fa-print text-brand-gold"></i>
+                                </button>
+                            </div>
+
+                            <!-- PANDUAN FUNGSI UKURAN -->
+                            <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-[10px] space-y-1.5 text-slate-400">
+                                <span class="font-bold text-brand-gold uppercase block">Fungsi Peruntukan Ukuran Label:</span>
+                                <p>• <strong>7 x 5 cm (Sedang):</strong> Cocok untuk Standing Pouch 250g - 500g & Box Thinwall kecil.</p>
+                                <p>• <strong>8 x 10 cm (Besar):</strong> Cocok untuk Plastik Vacuum 1kg, Dimsum Box, & Pouch Besar.</p>
+                                <p>• <strong>10 x 15 cm (Extra Large):</strong> Standar luar kardus packing / stiker pengiriman utama.</p>
+                                <p>• <strong>5 x 5 cm (Mini/Kotak):</strong> Cocok untuk Stiker Toples, Seal Penutup, atau Botol Sambal.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 6: STRATEGI JUALAN -->
+            <div id="tab-strategi" class="tab-content bg-slate-900 text-white rounded-3xl p-6 md:p-10 shadow-2xl border border-slate-800">
+                <div class="mb-8">
+                    <div class="flex items-center gap-2 text-[10px] font-bold tracking-widest text-brand-gold uppercase mb-1">
+                        <span class="w-4 h-[2px] bg-brand-gold inline-block"></span> PLATFORM UTAMA
+                    </div>
+                    <h2 class="font-serif text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">
+                        3 Channel Jualan Terbukti
+                    </h2>
+                    <p class="text-xs md:text-sm text-slate-400">
+                        Kombinasi 3 platform ini sudah menghasilkan jutaan rupiah per bulan untuk para seller frozen food sukses.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+                    <div class="border border-slate-800 rounded-2xl p-5 bg-slate-800/40 text-center hover:border-brand-orange/40 transition duration-200 shadow-sm flex flex-col items-center">
+                        <div class="text-3xl mb-3">💬</div>
+                        <h3 class="font-bold text-base text-white mb-2">WhatsApp</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            WA Business + Katalog. Update status setiap hari. Broadcast ke 200 kontak yang sudah izin.
+                        </p>
+                    </div>
+
+                    <div class="border border-slate-800 rounded-2xl p-5 bg-slate-800/40 text-center hover:border-brand-orange/40 transition duration-200 shadow-sm flex flex-col items-center">
+                        <div class="text-3xl mb-3">📸</div>
+                        <h3 class="font-bold text-base text-white mb-2">Instagram</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Feed + Reels + Stories. Konten memasak = viral. 3x post/hari, pakai hashtag niche.
+                        </p>
+                    </div>
+
+                    <div class="border border-slate-800 rounded-2xl p-5 bg-slate-800/40 text-center hover:border-brand-orange/40 transition duration-200 shadow-sm flex flex-col items-center">
+                        <div class="text-3xl mb-3">🛍️</div>
+                        <h3 class="font-bold text-base text-white mb-2">Shopee Food</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Daftar Shopee Mall. Buka untuk pre-order & delivery. Rating penting = foto bagus.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="flex items-center gap-2 text-[10px] font-bold tracking-widest text-brand-gold uppercase">
+                        <span class="w-4 h-[2px] bg-brand-gold inline-block"></span> SCRIPT & CAPTION
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-[#0B1120] text-white p-6 rounded-2xl border border-slate-800 shadow-xl relative">
+                        <div class="inline-flex items-center gap-1.5 bg-brand-orange text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3">
+                            <i class="fa-solid fa-message text-[9px]"></i> SCRIPT OPENING WA
+                        </div>
+                        <p class="text-xs md:text-sm text-slate-200 leading-relaxed italic">
+                            "Halo kak! 👋 Kami dari <strong class="text-brand-gold font-semibold">[Nama Brand]</strong> — frozen food homemade yang dibuat fresh setiap hari dari bahan-bahan pilihan. Hari ini ada <strong class="text-brand-gold font-semibold">promo spesial</strong> Bakso Aci + Dimsum Ayam bundling hanya Rp 35.000 (hemat Rp 10.000). Mau dicoba kak? Bisa COD area [kota] atau kirim via ekspedisi 🚚"
+                        </p>
+                    </div>
+
+                    <div class="bg-[#0B1120] text-white p-6 rounded-2xl border border-slate-800 shadow-xl relative">
+                        <div class="inline-flex items-center gap-1.5 bg-brand-orange text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3">
+                            <i class="fa-solid fa-bullhorn text-[9px]"></i> CAPTION INSTAGRAM VIRAL
+                        </div>
+                        <div class="text-xs md:text-sm text-slate-200 leading-relaxed space-y-3 font-sans">
+                            <p class="italic font-semibold text-white">
+                                "*❄️ FROZEN FOOD HOMEMADE — BUKAN FROZEN FOOD BIASA!*
+                            </p>
+                            <div>
+                                <p class="mb-1">Kami bikin sendiri setiap hari dari:</p>
+                                <ul class="space-y-1 pl-1">
+                                    <li>✅ Daging segar pilihan</li>
+                                    <li>✅ Bumbu rempah asli</li>
+                                    <li>✅ TANPA pengawet tambahan</li>
+                                </ul>
+                            </div>
+                            <p class="text-brand-gold font-bold">
+                                10 pcs Bakso Aci Kuah Merah cuma Rp 15.000!
+                            </p>
+                            <p class="text-slate-400">
+                                Tahan 3 bulan di freezer 🥶
+                            </p>
+                            <div class="pt-2">
+                                <p>DM / WA: 08xxxxxxxxxx</p>
+                                <p>COD: [area kamu]</p>
+                            </div>
+                            <p class="text-slate-400 text-[11px] pt-2 italic">
+                                #frozenfood #frozenfoodhomemade #baksoaci #jualanbakso #kulinersurabaya*
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#0B1120] text-white p-6 rounded-2xl border border-slate-800 shadow-xl relative">
+                        <div class="inline-flex items-center gap-1.5 bg-brand-orange text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3">
+                            <i class="fa-solid fa-handshake-angle text-[9px]"></i> SCRIPT CLOSING CHAT
+                        </div>
+                        <p class="text-xs md:text-sm text-slate-200 leading-relaxed italic">
+                            "Makasih kak sudah tanya-tanya 😊 Stok hari ini tinggal <strong class="text-brand-gold font-semibold">15 pack lagi</strong>, biasanya habis sebelum sore. Kalau mau order sekarang, aku Keep-in produknya dan dikirim sore ini juga ya kak! Mau bayar via Transfer / QRIS / COD?"
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById('tab-' + tabId).classList.add('active');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = "nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition text-slate-400 hover:bg-slate-800/60 hover:text-white";
+            });
+            
+            const activeBtn = document.getElementById('btn-' + tabId);
+            if(activeBtn) {
+                activeBtn.className = "nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition text-white bg-brand-orange shadow-lg shadow-brand-orange/20";
+            }
+
+            const titles = {
+                'cover': 'COVER KIT',
+                'hpp': 'KALKULATOR HPP',
+                'packing': 'PANDUAN PACKING',
+                'supplier': 'SOURCING GUIDE',
+                'label': 'TEMPLATE LABEL',
+                'strategi': 'MARKETING GUIDE'
+            };
+            const badgeMobile = document.getElementById('page-title-badge-mobile');
+            if (badgeMobile) badgeMobile.innerText = titles[tabId] || 'DIGITAL KIT';
+
+            const sidebar = document.getElementById('sidebar');
+            if (!sidebar.classList.contains('-translate-x-full') && window.innerWidth < 768) {
+                toggleSidebar();
+            }
+        }
+
+        // FUNGSI PERHITUNGAN HPP & PROFIT & BEP
+        function formatRupiah(angka) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(angka);
+        }
+
+        function updateMarginLabel() {
+            const margin = document.getElementById('marginProfit').value;
+            document.getElementById('marginVal').innerText = margin + '%';
+        }
+
+        function hitungSemua() {
+            const biayaBahan = parseFloat(document.getElementById('biayaBahan').value) || 0;
+            const totalPcs = parseFloat(document.getElementById('totalPcs').value) || 0;
+            const pcsPerPack = parseFloat(document.getElementById('pcsPerPack').value) || 0;
+            const biayaLain = parseFloat(document.getElementById('biayaLain').value) || 0;
+            const biayaPacking = parseFloat(document.getElementById('biayaPacking').value) || 0;
+            const marginProfit = parseFloat(document.getElementById('marginProfit').value) || 0;
+            const targetJualHarian = parseFloat(document.getElementById('targetJualHarian').value) || 0;
+            const biayaTetap = parseFloat(document.getElementById('biayaTetap').value) || 0;
+
+            const hppBatch = biayaBahan + biayaLain + biayaPacking;
+            const hppPcs = totalPcs > 0 ? hppBatch / totalPcs : 0;
+            const hppPack = pcsPerPack > 0 ? hppPcs * pcsPerPack : 0;
+
+            const profitPerPack = hppPack * (marginProfit / 100);
+            const hargaJualPack = hppPack + profitPerPack;
+
+            const omsetHarian = targetJualHarian * hargaJualPack;
+            const profitHarian = targetJualHarian * profitPerPack;
+
+            let bepPack = 0;
+            let bepRupiah = 0;
+
+            if (profitPerPack > 0 && biayaTetap > 0) {
+                bepPack = Math.ceil(biayaTetap / profitPerPack);
+                bepRupiah = bepPack * hargaJualPack;
+            }
+
+            document.getElementById('resHppBatch').innerText = formatRupiah(hppBatch);
+            document.getElementById('resHppPcs').innerText = formatRupiah(hppPcs);
+            document.getElementById('resHppPack').innerText = formatRupiah(hppPack);
+            document.getElementById('resHargaJualPack').innerText = formatRupiah(hargaJualPack);
+            document.getElementById('resProfitPack').innerText = formatRupiah(profitPerPack);
+            
+            document.getElementById('targetLabelDisplay').innerText = `Target: ${targetJualHarian} Pack/Hari`;
+            
+            document.getElementById('omset10').innerText = formatRupiah(omsetHarian * 10);
+            document.getElementById('profit10').innerText = formatRupiah(profitHarian * 10);
+
+            document.getElementById('omset30').innerText = formatRupiah(omsetHarian * 30);
+            document.getElementById('profit30').innerText = formatRupiah(profitHarian * 30);
+
+            document.getElementById('omset100').innerText = formatRupiah(omsetHarian * 100);
+            document.getElementById('profit100').innerText = formatRupiah(profitHarian * 100);
+
+            document.getElementById('resBepPack').innerText = bepPack.toLocaleString('id-ID') + " Pack";
+            document.getElementById('resBepRupiah').innerText = formatRupiah(bepRupiah);
+        }
+
+        function resetForm() {
+            document.getElementById('biayaBahan').value = '';
+            document.getElementById('totalPcs').value = '';
+            document.getElementById('pcsPerPack').value = '';
+            document.getElementById('biayaLain').value = '';
+            document.getElementById('biayaPacking').value = '';
+            document.getElementById('targetJualHarian').value = '';
+            document.getElementById('biayaTetap').value = '';
+            document.getElementById('marginProfit').value = 30;
+            updateMarginLabel();
+            hitungSemua();
+        }
+
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const element = document.getElementById('calculator-content');
+
+            html2canvas(element, { scale: 2 }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 190;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                
+                pdf.setFontSize(16);
+                pdf.text("Laporan HPP & Proyeksi Pendapatan Frozen Food", 10, 15);
+                pdf.setFontSize(10);
+                pdf.text("Dicetak pada: " + new Date().toLocaleDateString('id-ID'), 10, 22);
+                
+                pdf.addImage(imgData, 'PNG', 10, 28, imgWidth, imgHeight);
+                pdf.save("Laporan_HPP_Proyeksi_FrozenFood.pdf");
+            });
+        }
+
+        function updateLabelPreview() {
+            document.getElementById('prev-lbl-brand').innerText = document.getElementById('lbl-brand').value || 'Brand Kamu';
+            document.getElementById('prev-lbl-wa').innerText = document.getElementById('lbl-wa').value || '08xx-xxxx-xxxx';
+            document.getElementById('prev-lbl-produk').innerText = document.getElementById('lbl-produk').value || 'Nama Produk';
+            document.getElementById('prev-lbl-isiberat').innerText = document.getElementById('lbl-isiberat').value || 'Isi / Berat';
+            document.getElementById('prev-lbl-harga').innerText = document.getElementById('lbl-harga').value || 'Rp 0';
+            document.getElementById('prev-lbl-prod').innerText = document.getElementById('lbl-prod').value || '-';
+            document.getElementById('prev-lbl-exp').innerText = document.getElementById('lbl-exp').value || '-';
+            document.getElementById('prev-lbl-saji').innerText = document.getElementById('lbl-saji').value || '-';
+            document.getElementById('prev-lbl-simpan').innerText = document.getElementById('lbl-simpan').value || '-';
+        }
+
+        function previewLogo(event) {
+            const file = event.target.files[0];
+            const logoImg = document.getElementById('prev-lbl-logo');
+            const logoContainer = document.getElementById('prev-logo-container');
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    logoImg.src = e.target.result;
+                    logoContainer.classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function setLabelTheme(theme) {
+            const preview = document.getElementById('label-card-preview');
+            const styles = {
+                'dark': 'bg-[#0B1120] text-white border-slate-800 shadow-2xl',
+                'light': 'bg-white text-slate-900 border-slate-300 shadow-xl',
+                'hijau': 'bg-emerald-950 text-emerald-100 border-emerald-800 shadow-xl',
+                'gold': 'bg-amber-950 text-amber-200 border-amber-700 shadow-xl',
+                'red': 'bg-rose-950 text-rose-100 border-rose-800 shadow-xl',
+                'blue': 'bg-slate-900 text-sky-200 border-sky-800 shadow-xl',
+                'purple': 'bg-purple-950 text-purple-100 border-purple-800 shadow-xl',
+                'vintage': 'bg-[#e7d8c9] text-[#4a3b32] border-[#b8a390] shadow-xl font-serif',
+                'neon': 'bg-black text-lime-400 border-lime-500 shadow-2xl',
+                'pastel': 'bg-pink-950 text-pink-100 border-pink-800 shadow-xl'
+            };
+            preview.className = `p-5 rounded-2xl border relative transition-all duration-300 ${styles[theme] || styles['dark']}`;
+        }
+
+        // FUNGSI UKURAN CETAK
+        function cetakUkuran(ukuran) {
+            const preview = document.getElementById('label-card-preview');
+            const dimensions = {
+                '7x5': 'width: 280px; min-height: 200px;',
+                '8x10': 'width: 320px; min-height: 400px;',
+                '10x15': 'width: 400px; min-height: 600px;',
+                '5x5': 'width: 200px; min-height: 200px;'
+            };
+            
+            const originalStyle = preview.getAttribute('style') || '';
+            preview.setAttribute('style', dimensions[ukuran]);
+            window.print();
+            preview.setAttribute('style', originalStyle);
+        }
+
+        // Jalankan perhitungan awal saat dimuat
+        window.onload = function() {
+            hitungSemua();
+        }
+    </script>
+</body>
+</html>
